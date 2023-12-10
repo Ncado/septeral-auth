@@ -43,19 +43,26 @@ export class UsersService {
 
   async createUser(createUserData: CreateUserDto): Promise<User> {
     try {
-      if (await this.getUserByEmail(createUserData.email)) {
+      if (
+        await this.userRepository.findOne({
+          where: { email: createUserData.email },
+        })
+      ) {
         throw new BadRequestException('User already exists');
       }
+      console.log('createUserData', createUserData);
 
       const bycriptedPassword = await this.passwordService.hashPassword(
         createUserData.password,
       );
+
       const user = await this.userRepository.save({
         ...createUserData,
         origin: UserOriginEnum.CLASSIC,
         password: bycriptedPassword,
       });
 
+      console.log('user', user);
       return user;
     } catch (error) {
       this.logger.error('Error creating user:', error.message);

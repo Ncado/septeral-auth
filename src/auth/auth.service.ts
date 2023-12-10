@@ -38,7 +38,7 @@ export class AuthService {
 
       const payload = {
         email: loginDto.email,
-        id: user.id,
+        sub: user.id,
       };
       const access_token = await this.issueToken(payload);
       return {
@@ -67,11 +67,11 @@ export class AuthService {
     }
   }
 
-  async issueToken(payload: { email: string; id: number }) {
+  async issueToken(payload: { email: string; sub: number }) {
     try {
       return this.jwtService.sign({
         email: payload.email,
-        sub: payload.id,
+        sub: payload.sub,
       });
     } catch (error) {
       this.logger.error('Error issuing token:', error.message);
@@ -84,7 +84,7 @@ export class AuthService {
       const newUser = await this.usersService.createGUser(user.email);
       const payload = {
         email: user.email,
-        id: newUser.id,
+        sub: newUser.id,
       };
 
       const access_token = await this.issueToken(payload);
