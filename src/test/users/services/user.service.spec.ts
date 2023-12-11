@@ -7,10 +7,12 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from '../../../users/dto/input/create-user.input';
 import { UserOriginEnum } from '../../../users/models/user-origin.enum';
 import { PasswordService } from '../../../utils/password.service';
+import { CacheService } from '../../../cache/cache.service';
 
 describe('UsersService', () => {
   let usersService: UsersService;
   let userRepository: Repository<User>;
+  let cacheService: CacheService; // Declare CacheService
 
   const mockUserRepository = {
     findOne: jest.fn(),
@@ -21,6 +23,10 @@ describe('UsersService', () => {
     hashPassword: jest.fn(),
   };
 
+  const mockCacheService = {
+    get: jest.fn(),
+    set: jest.fn(),
+  };
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -33,11 +39,16 @@ describe('UsersService', () => {
           provide: PasswordService,
           useValue: mockPasswordService,
         },
+        {
+          provide: CacheService,
+          useValue: mockCacheService,
+        },
       ],
     }).compile();
 
     usersService = module.get<UsersService>(UsersService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    cacheService = module.get<CacheService>(CacheService);
   });
 
   afterEach(() => {

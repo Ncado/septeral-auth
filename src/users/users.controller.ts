@@ -23,23 +23,12 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get()
   async get(@Query('email') email: string) {
-    const cacheKey = `user:${email}`;
-
-    const cachedData = await this.cacheService.get(cacheKey);
-    if (cachedData) {
-      this.logger.log('Getting data from cache');
-      return cachedData;
-    }
-
     const userData = await this.usersService.getUserByEmail(email);
 
     if (!userData) {
       throw new NotFoundException('User not found');
     }
 
-    await this.cacheService.set(cacheKey, userData, 30);
-
-    this.logger.log(`Data set to cache for user ${userData.email}`);
     return dumpUser(userData);
   }
 }
